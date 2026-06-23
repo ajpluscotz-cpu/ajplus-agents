@@ -190,7 +190,7 @@
   async function init(){
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) { window.location.href = 'index.html'; return; }
-    const { data: profile } = await supabase.from('users').select('company_id').eq('id', session.user.id).single();
+    const { data: profile } = await supabase.from('users').select('company_id').eq('auth_id', session.user.id).single();
     const companyId = profile?.company_id;
     if (!companyId){
       document.getElementById('convoList').innerHTML = '<div class="empty">company_id haipatikani.</div>';
