@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AJPLUS AI — Conversations</title>
+<style>
+  :root{
+    --bg:#0B0E1A; --bg-card:#141A2E; --border:#232B45;
+    --text:#F1F5F9; --text-dim:#8B93A7;
+    --blue:#2F7BFF; --green:#22C55E; --purple:#8B5CF6; --gold:#F5A623; --red:#EF4444;
+    --sidebar-w:230px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:-apple-system,system-ui,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--text);}
+  a{color:inherit; text-decoration:none;}
+
+  .sidebar{position:fixed; top:0; left:0; bottom:0; width:var(--sidebar-w); background:#0E1326; border-right:1px solid var(--border); padding:20px 14px; display:flex; flex-direction:column; overflow-y:auto; z-index:10;}
+  .logo-row{display:flex; align-items:center; gap:10px; padding:0 6px 18px;}
+  .logo-mark{width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,var(--blue),var(--purple)); display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff;}
+  .logo-text h1{font-size:15px; font-weight:800;}
+  .logo-text p{font-size:9px; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase;}
+  .nav-item{display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; font-size:13.5px; color:var(--text-dim); margin-bottom:2px; cursor:pointer;}
+  .nav-item:hover{background:#1A2240; color:var(--text);}
+  .nav-item.active{background:var(--blue); color:#fff; font-weight:600;}
+  .nav-item.soon{opacity:.4; cursor:default;}
+  .nav-section-label{font-size:10px; letter-spacing:1px; color:#4B5572; text-transform:uppercase; margin:18px 0 6px 12px;}
+  .sidebar-footer{margin-top:auto; padding-top:14px; border-top:1px solid var(--border);}
+  #logoutBtn{width:100%; padding:10px; border-radius:10px; border:1px solid var(--border); background:transparent; color:var(--text-dim); font-size:13px; cursor:pointer;}
+  #logoutBtn:hover{border-color:var(--red); color:var(--red);}
+
+  .main{margin-left:var(--sidebar-w); padding:22px 26px; min-height:100vh;}
+  .page-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;}
+  .page-head h2{font-size:20px;}
+
+  .layout{display:grid; grid-template-columns:340px 1fr; gap:16px; height:calc(100vh - 110px);}
+  @media(max-width:880px){.layout{grid-template-columns:1fr; height:auto;}}
+
+  .convo-list{background:var(--bg-card); border:1px solid var(--border); border-radius:14px; overflow-y:auto;}
+  .convo-item{padding:14px 16px; border-bottom:1px solid var(--border); cursor:pointer; font-size:13px;}
+  .convo-item:hover, .convo-item.active{background:#1A2240;}
+  .convo-item .top-row{display:flex; justify-content:space-between; margin-bottom:4px;}
+  .convo-item .channel{font-weight:600;}
+  .convo-item .meta{color:var(--text-dim); font-size:11px;}
+  .status-pill{font-size:10px; padding:2px 8px; border-radius:20px; text-transform:uppercase;}
+  .status-pill.open{background:rgba(34,197,94,.15); color:var(--green);}
+  .status-pill.closed{background:rgba(139,93,246,.1); color:var(--text-dim);}
+
+  .thread{background:var(--bg-card); border:1px solid var(--border); border-radius:14px; display:flex; flex-direction:column;}
+  .thread-head{padding:16px; border-bottom:1px solid var(--border); font-size:13px; color:var(--text-dim);}
+  .thread-body{flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px;}
+  .msg{max-width:75%; padding:10px 14px; border-radius:14px; font-size:13px; line-height:1.4;}
+  .msg.client{background:#1A2240; align-self:flex-start; border-bottom-left-radius:4px;}
+  .msg.agent, .msg.human{background:var(--blue); color:#fff; align-self:flex-end; border-bottom-right-radius:4px;}
+  .msg .time{font-size:10px; opacity:.6; margin-top:4px; display:block;}
+  .thread-input{display:flex; gap:8px; padding:14px; border-top:1px solid var(--border);}
+  .thread-input input{flex:1; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:#0F1424; color:var(--text); font-size:13px;}
+  .thread-input button{background:var(--green); color:#06210f; border:none; padding:10px 16px; border-radius:10px; font-weight:700; font-size:13px; cursor:pointer;}
+  .empty{color:var(--text-dim); font-size:13px; padding:30px; text-align:center;}
+
+  @media(max-width:720px){
+    .sidebar{transform:translateX(-100%); transition:transform .2s;}
+    .sidebar.open{transform:translateX(0);}
+    .main{margin-left:0;}
+    .menu-btn{display:inline-flex !important;}
+  }
+  .menu-btn{display:none; align-items:center; justify-content:center; width:36px; height:36px; border-radius:8px; background:var(--bg-card); border:1px solid var(--border); color:var(--text); font-size:16px; cursor:pointer;}
+</style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="logo-row">
+    <div class="logo-mark">A</div>
+    <div class="logo-text"><h1>AJPLUS AI</h1><p>Agent OS</p></div>
+  </div>
+  <a href="dashboard.html" class="nav-item">📊 Dashboard</a>
+  <a href="agents.html" class="nav-item">🤖 Agents AI</a>
+  <a href="conversations.html" class="nav-item active">💬 Conversations</a>
+  <div class="nav-section-label">Hivi Karibuni</div>
+  <div class="nav-item soon">👥 Leads</div>
+  <div class="nav-item soon">🏢 Clients</div>
+  <div class="nav-item soon">✅ Tasks</div>
+  <div class="nav-item soon">💳 Billing</div>
+  <div class="sidebar-footer"><button id="logoutBtn">Toka (Logout)</button></div>
+</aside>
+
+<main class="main">
+  <button class="menu-btn" id="menuBtn">☰</button>
+  <div class="page-head"><h2>Conversations</h2></div>
+
+  <div class="layout">
+    <div class="convo-list" id="convoList"><div class="empty">Inapakia...</div></div>
+    <div class="thread">
+      <div class="thread-head" id="threadHead">Chagua mazungumzo kushoto kuona ujumbe.</div>
+      <div class="thread-body" id="threadBody"></div>
+      <div class="thread-input" id="threadInputBox" style="display:none;">
+        <input type="text" id="msgInput" placeholder="Andika ujumbe wa majaribio...">
+        <button id="sendBtn">Tuma</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+  // 🔧 WEKA HAPA: Supabase URL na Anon Key
+  const SUPABASE_URL = 'PASTE_SUPABASE_URL_HAPA';
+  const SUPABASE_ANON_KEY = 'PASTE_ANON_KEY_HAPA';
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  document.getElementById('menuBtn').onclick = () => document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('logoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'index.html'; };
+
+  let activeConvoId = null;
+
+  function fmtTime(ts){
+    return new Date(ts).toLocaleString('sw-TZ', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+  }
+
+  async function loadConversations(agentIds){
+    const list = document.getElementById('convoList');
+    if (!agentIds.length){
+      list.innerHTML = '<div class="empty">Hakuna agent — unda moja kwenye ukurasa wa Agents kwanza.</div>';
+      return;
+    }
+    const { data } = await supabase.from('conversations').select('*').in('agent_id', agentIds).order('started_at', { ascending: false });
+
+    if (!data || data.length === 0){
+      list.innerHTML = '<div class="empty">Hakuna mazungumzo bado. Yataonekana hapa pindi WhatsApp/PS Agent ikiwa live.</div>';
+      return;
+    }
+
+    list.innerHTML = data.map(c => `
+      <div class="convo-item" data-id="${c.conversation_id}">
+        <div class="top-row">
+          <span class="channel">${c.channel || 'channel'}</span>
+          <span class="status-pill ${c.status === 'open' ? 'open' : 'closed'}">${c.status}</span>
+        </div>
+        <div class="meta">${fmtTime(c.started_at)}</div>
+      </div>
+    `).join('');
+
+    list.querySelectorAll('.convo-item').forEach(el => {
+      el.addEventListener('click', () => {
+        list.querySelectorAll('.convo-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+        openThread(el.dataset.id);
+      });
+    });
+  }
+
+  async function openThread(conversationId){
+    activeConvoId = conversationId;
+    document.getElementById('threadHead').textContent = `Mazungumzo: ${conversationId.slice(0,8)}...`;
+    document.getElementById('threadInputBox').style.display = 'flex';
+
+    const { data: messages } = await supabase.from('messages').select('*').eq('conversation_id', conversationId).order('timestamp', { ascending: true });
+    renderMessages(messages || []);
+  }
+
+  function renderMessages(messages){
+    const body = document.getElementById('threadBody');
+    if (!messages.length){
+      body.innerHTML = '<div class="empty">Hakuna ujumbe bado kwenye mazungumzo haya.</div>';
+      return;
+    }
+    body.innerHTML = messages.map(m => `
+      <div class="msg ${m.sender}">
+        ${m.content}
+        <span class="time">${fmtTime(m.timestamp)}</span>
+      </div>
+    `).join('');
+    body.scrollTop = body.scrollHeight;
+  }
+
+  document.getElementById('sendBtn').onclick = async () => {
+    const input = document.getElementById('msgInput');
+    const content = input.value.trim();
+    if (!content || !activeConvoId) return;
+
+    await supabase.from('messages').insert({
+      conversation_id: activeConvoId, sender: 'human', content, message_type: 'text'
+    });
+    input.value = '';
+    openThread(activeConvoId);
+  };
+
+  async function init(){
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = 'index.html'; return; }
+    const { data: profile } = await supabase.from('users').select('company_id').eq('id', session.user.id).single();
+    const companyId = profile?.company_id;
+    if (!companyId){
+      document.getElementById('convoList').innerHTML = '<div class="empty">company_id haipatikani.</div>';
+      return;
+    }
+    const { data: agents } = await supabase.from('agents').select('agent_id').eq('company_id', companyId);
+    loadConversations((agents || []).map(a => a.agent_id));
+  }
+
+  init();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AJPLUS AI — Ingia</title>
+<style>
+  :root{
+    --bg:#0B0E1A; --bg-card:#141A2E; --border:#232B45;
+    --text:#F1F5F9; --text-dim:#8B93A7;
+    --blue:#2F7BFF; --green:#22C55E; --purple:#8B5CF6; --gold:#F5A623; --red:#EF4444;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;
+    background:radial-gradient(circle at 20% 20%, #15203a 0%, var(--bg) 55%);
+    color:var(--text); min-height:100vh;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .card{
+    width:100%; max-width:400px; background:var(--bg-card);
+    border:1px solid var(--border); border-radius:18px; padding:36px 28px;
+    box-shadow:0 20px 60px rgba(0,0,0,.4);
+  }
+  .logo-row{display:flex; align-items:center; gap:12px; margin-bottom:6px;}
+  .logo-mark{
+    width:44px; height:44px; border-radius:12px; flex-shrink:0;
+    background:linear-gradient(135deg, var(--blue), var(--purple));
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:20px; color:#fff;
+  }
+  .logo-text h1{font-size:18px; font-weight:800; letter-spacing:.3px;}
+  .logo-text p{font-size:10px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; margin-top:2px;}
+  .tagline{color:var(--text-dim); font-size:13px; margin:18px 0 26px;}
+  .flag-bar{
+    height:4px; width:64px; border-radius:4px; margin:14px 0 0;
+    background:linear-gradient(90deg, #1EB53A 0%, #1EB53A 33%, #FCD116 33%, #FCD116 66%, #00A3DD 66%, #00A3DD 100%);
+  }
+  label{display:block; font-size:12px; color:var(--text-dim); margin:18px 0 6px;}
+  input{
+    width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--border);
+    background:#0F1424; color:var(--text); font-size:14px; outline:none;
+  }
+  input:focus{border-color:var(--blue);}
+  button{
+    width:100%; margin-top:26px; padding:13px; border:none; border-radius:10px;
+    background:var(--green); color:#06210f; font-weight:700; font-size:14px; cursor:pointer;
+    transition:opacity .15s;
+  }
+  button:disabled{opacity:.6; cursor:not-allowed;}
+  .error{
+    margin-top:14px; padding:10px 12px; border-radius:8px; font-size:13px;
+    background:rgba(239,68,68,.12); color:#fca5a5; border:1px solid rgba(239,68,68,.3);
+    display:none;
+  }
+  .footer{margin-top:22px; text-align:center; font-size:11px; color:var(--text-dim);}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo-row">
+    <div class="logo-mark">A</div>
+    <div class="logo-text">
+      <h1>AJPLUS AI</h1>
+      <p>Agent OS</p>
+    </div>
+  </div>
+  <p class="tagline">Biashara yako, Akili zaidi.</p>
+  <div class="flag-bar"></div>
+
+  <form id="loginForm">
+    <label for="email">Barua pepe</label>
+    <input id="email" type="email" required placeholder="wewe@kampuni.co.tz">
+
+    <label for="password">Nenosiri</label>
+    <input id="password" type="password" required placeholder="••••••••">
+
+    <button id="loginBtn" type="submit">Ingia</button>
+    <div class="error" id="errorBox"></div>
+  </form>
+
+  <div class="footer">AJ PLUS COMPANY LIMITED &copy; 2026</div>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+  // 🔧 WEKA HAPA: Supabase URL na Anon Key (Project Settings → API)
+  const SUPABASE_URL = 'PASTE_SUPABASE_URL_HAPA';
+  const SUPABASE_ANON_KEY = 'PASTE_ANON_KEY_HAPA';
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const form = document.getElementById('loginForm');
+  const errorBox = document.getElementById('errorBox');
+  const btn = document.getElementById('loginBtn');
+
+  // Kama tayari ame-login, mpeleke dashboard moja kwa moja
+  supabase.auth.getSession().then(({ data }) => {
+    if (data.session) window.location.href = 'dashboard.html';
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorBox.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = 'Inaingia...';
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      errorBox.textContent = 'Imeshindwa kuingia: barua pepe au nenosiri sio sahihi.';
+      errorBox.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Ingia';
+      return;
+    }
+
+    window.location.href = 'dashboard.html';
+  });
+</script>
+
+</body>
+</html>
