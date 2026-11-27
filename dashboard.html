@@ -155,12 +155,14 @@
 </main>
 
 <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.108.2/+esm';
 
   // 🔧 WEKA HAPA: Supabase URL na Anon Key (zifanane na index.html)
   const SUPABASE_URL = 'https://veptsbhbvmxpefmivmqc.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_w7guGTFNF3Gy4LOGmUwapA_Z6Ll4z72';
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // Safisha maandishi kabla ya kuyaweka kwenye HTML (zuia XSS kutoka ujumbe wa wateja)
+  const esc = (s) => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
   document.getElementById('menuBtn').onclick = () => document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('logoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'index.html'; };
@@ -204,8 +206,8 @@
     const statusHtml = (agents && agents.length)
       ? agents.map(a => `
           <div class="row">
-            <span><span class="dot ${a.status === 'online' ? 'online' : 'offline'}"></span>${a.name}</span>
-            <span style="color:var(--text-dim); font-size:12px;">${a.type}</span>
+            <span><span class="dot ${a.status === 'online' ? 'online' : 'offline'}"></span>${esc(a.name)}</span>
+            <span style="color:var(--text-dim); font-size:12px;">${esc(a.type)}</span>
           </div>`).join('')
       : '<div class="empty">Hakuna agent bado. <a href="agents.html" style="color:var(--blue)">Unda moja →</a></div>';
     document.getElementById('agentStatusList').innerHTML = statusHtml;
@@ -227,7 +229,7 @@
     document.getElementById('recentConversations').innerHTML = (convos && convos.length)
       ? convos.map(c => `
           <div class="row">
-            <span>💬 ${c.channel || 'channel'} — ${c.status}</span>
+            <span>💬 ${esc(c.channel || 'channel')} — ${esc(c.status)}</span>
             <span style="color:var(--text-dim); font-size:12px;">${timeAgo(c.started_at)}</span>
           </div>`).join('')
       : '<div class="empty">Hakuna mazungumzo bado.</div>';
