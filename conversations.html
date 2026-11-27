@@ -103,12 +103,14 @@
 </main>
 
 <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.108.2/+esm';
 
   // 🔧 WEKA HAPA: Supabase URL na Anon Key
   const SUPABASE_URL = 'https://veptsbhbvmxpefmivmqc.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_w7guGTFNF3Gy4LOGmUwapA_Z6Ll4z72';
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // Safisha maandishi kabla ya kuyaweka kwenye HTML (zuia XSS kutoka ujumbe wa wateja)
+  const esc = (s) => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
   document.getElementById('menuBtn').onclick = () => document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('logoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'index.html'; };
@@ -133,10 +135,10 @@
     }
 
     list.innerHTML = data.map(c => `
-      <div class="convo-item" data-id="${c.conversation_id}">
+      <div class="convo-item" data-id="${esc(c.conversation_id)}">
         <div class="top-row">
-          <span class="channel">${c.channel || 'channel'}</span>
-          <span class="status-pill ${c.status === 'open' ? 'open' : 'closed'}">${c.status}</span>
+          <span class="channel">${esc(c.channel || 'channel')}</span>
+          <span class="status-pill ${c.status === 'open' ? 'open' : 'closed'}">${esc(c.status)}</span>
         </div>
         <div class="meta">${fmtTime(c.started_at)}</div>
       </div>
@@ -167,8 +169,8 @@
       return;
     }
     body.innerHTML = messages.map(m => `
-      <div class="msg ${m.sender}">
-        ${m.content}
+      <div class="msg ${['agent','client','human'].includes(m.sender) ? m.sender : 'client'}">
+        ${esc(m.content)}
         <span class="time">${fmtTime(m.timestamp)}</span>
       </div>
     `).join('');

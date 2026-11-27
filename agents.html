@@ -129,12 +129,14 @@
 </div>
 
 <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.108.2/+esm';
 
   // 🔧 WEKA HAPA: Supabase URL na Anon Key
   const SUPABASE_URL = 'https://veptsbhbvmxpefmivmqc.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_w7guGTFNF3Gy4LOGmUwapA_Z6Ll4z72';
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // Safisha maandishi kabla ya kuyaweka kwenye HTML (zuia XSS kutoka ujumbe wa wateja)
+  const esc = (s) => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
   document.getElementById('menuBtn').onclick = () => document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('logoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'index.html'; };
@@ -151,12 +153,12 @@
       <div class="agent-card">
         <div class="top">
           <div>
-            <h4>${a.name}</h4>
-            <span class="badge ${a.type}">${a.type}</span>
+            <h4>${esc(a.name)}</h4>
+            <span class="badge ${esc(a.type)}">${esc(a.type)}</span>
           </div>
         </div>
-        <p class="desc">${a.description || 'Hakuna maelezo bado.'}</p>
-        <div class="status-toggle" data-id="${a.agent_id}" data-status="${a.status}">
+        <p class="desc">${esc(a.description || 'Hakuna maelezo bado.')}</p>
+        <div class="status-toggle" data-id="${esc(a.agent_id)}" data-status="${esc(a.status)}">
           <span class="dot ${a.status === 'online' ? 'online' : 'offline'}"></span>
           ${a.status === 'online' ? 'Online — bonyeza kuzima' : 'Offline — bonyeza kuwasha'}
         </div>
